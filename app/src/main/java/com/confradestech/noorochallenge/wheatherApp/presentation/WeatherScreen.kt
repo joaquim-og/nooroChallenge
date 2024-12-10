@@ -27,13 +27,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.confradestech.noorochallenge.R
 import com.confradestech.noorochallenge.core.domain.util.NetworkError
+import com.confradestech.noorochallenge.core.presentation.util.getUiErrorFeedback
 import com.confradestech.noorochallenge.ui.theme.NooroChallengeTheme
 import com.confradestech.noorochallenge.ui.theme.cardBackGround
 import com.confradestech.noorochallenge.ui.theme.inputFieldColor
@@ -60,7 +63,9 @@ fun WeatherScreen(
         if (weatherInfoState.weatherInfo == null && weatherInfoState.error == null) {
             BuildNoCityText()
         }
-
+        if (weatherInfoState.weatherInfo == null && weatherInfoState.error != null) {
+            BuildErrorFeedback(weatherInfoState.error)
+        }
     }
 }
 
@@ -123,6 +128,30 @@ private fun BuildNoCityText() {
         Text(
             stringResource(R.string.weatherScreen_no_city_selected_subtitle),
             style = MaterialTheme.typography.bodyLarge,
+        )
+    }
+}
+
+@Composable
+private fun BuildErrorFeedback(error: NetworkError) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier.fillMaxSize(1f),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            stringResource(R.string.error_generic),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            modifier = Modifier.padding(
+                horizontal = 12.dp
+            ),
+            text = error.getUiErrorFeedback(context),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
         )
     }
 }

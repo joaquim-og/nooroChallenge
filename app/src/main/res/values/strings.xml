@@ -8,6 +8,7 @@
     <!--    endregion WeatherScreen-->
 
 <!--    region commons-->
+    <string name="error_generic">Oooops</string>
     <string name="error_request_timeout">The request timed out</string>
     <string name="error_too_many_request">Api quota is exceeded</string>
     <string name="error_no_internet">Please check your internet connection</string>
