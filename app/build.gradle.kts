@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -25,7 +26,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://www.weatherapi.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/current.json?key=\"")
+            buildConfigField("String", "WEATHER_API_KEY", "\"b5966f7c7ec245df99f203702240912\"")
+        }
+        debug {
+            isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"https://api.weatherapi.com/v1/current.json?key=\"")
+            buildConfigField("String", "WEATHER_API_KEY", "\"b5966f7c7ec245df99f203702240912\"")
         }
     }
     compileOptions {

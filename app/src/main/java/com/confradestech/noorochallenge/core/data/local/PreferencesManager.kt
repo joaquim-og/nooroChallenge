@@ -1,4 +1,4 @@
-package com.confradestech.noorochallenge.core.data.dto
+package com.confradestech.noorochallenge.core.data.local
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
