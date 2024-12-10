@@ -17,6 +17,7 @@ suspend inline fun <reified T> responseToResult(
                 Result.Error(NetworkError.SERIALIZATION)
             }
         }
+        400 -> Result.Error(NetworkError.NO_MATCHING_LOCATION)
         408 -> Result.Error(NetworkError.REQUEST_TIMEOUT)
         429 -> Result.Error(NetworkError.TOO_MANY_REQUESTS)
         in 500..599 -> Result.Error(NetworkError.SERVER_ERROR)

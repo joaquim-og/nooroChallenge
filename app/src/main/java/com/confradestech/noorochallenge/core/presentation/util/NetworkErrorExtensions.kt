@@ -12,6 +12,7 @@ fun NetworkError.toString(context: Context): String {
         NetworkError.SERVER_ERROR -> context.getString(R.string.error_something_went_wrong)
         NetworkError.SERIALIZATION -> context.getString(R.string.error_serialization)
         NetworkError.UNKNOWN -> context.getString(R.string.error_something_went_wrong)
+        NetworkError.NO_MATCHING_LOCATION -> context.getString(R.string.error_something_went_wrong)
         NetworkError.NETWORK_ERROR -> context.getString(R.string.error_no_internet)
     }
 }
