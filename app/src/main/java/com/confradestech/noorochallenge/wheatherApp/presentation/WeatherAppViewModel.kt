@@ -2,6 +2,7 @@ package com.confradestech.noorochallenge.wheatherApp.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.confradestech.noorochallenge.core.data.local.PreferencesManager
 import com.confradestech.noorochallenge.core.domain.util.NetworkError
 import com.confradestech.noorochallenge.core.domain.util.onError
 import com.confradestech.noorochallenge.core.domain.util.onSuccess
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class WeatherAppViewModel(
     private val getWeatherInfoUseCase: GetWeatherInfoUseCase,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     private val _weatherInfoState = MutableStateFlow(WeatherUiState())
@@ -29,10 +31,12 @@ class WeatherAppViewModel(
             WeatherUiState()
         )
 
-
     fun searchWeatherInfo(cityName: String? = null) {
         viewModelScope.launch {
             updateLoadingState(true)
+            cityName?.let {
+                updateLastCitySearchedNameState(it)
+            }
             getWeatherInfoUseCase.invoke(cityName)
                 .onSuccess { weatherInfo ->
                     updateWeatherInfoState(weatherInfo)
@@ -43,7 +47,37 @@ class WeatherAppViewModel(
         }
     }
 
-    private fun updateWeatherInfoState(weatherInfo: WeatherInfo) {
+    //TODO
+    // call when user tap the city weather mini card
+    fun saveLastSearchedCity(city: String) {
+        viewModelScope.launch {
+            preferencesManager.saveLastCity(city)
+        }
+    }
+
+    //TODO
+    // call when user tap the city weather mini card
+    fun updateLastCitySearchedCardTappedState() {
+        viewModelScope.launch {
+            _weatherInfoState.update {
+                it.copy(
+                    isLastCitySearchedCardTapped = !it.isLastCitySearchedCardTapped
+                )
+            }
+        }
+    }
+
+    private fun updateLastCitySearchedNameState(cityName: String) {
+        viewModelScope.launch {
+            _weatherInfoState.update {
+                it.copy(
+                    lastCitySearchedName = cityName
+                )
+            }
+        }
+    }
+
+    private fun updateWeatherInfoState(weatherInfo: WeatherInfo?) {
         viewModelScope.launch {
             _weatherInfoState.update {
                 it.copy(

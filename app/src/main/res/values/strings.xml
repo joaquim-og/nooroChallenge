@@ -4,5 +4,6 @@
     <string name="error_too_many_request">Api quota is exceeded</string>
     <string name="error_no_internet">Please check your internet connection</string>
     <string name="error_something_went_wrong">Something went wrong. Please try again later</string>
+    <string name="error_no_matching_location">No matching location found, please check the city name</string>
     <string name="error_serialization">Couldn\'t match data</string>
 </resources>
