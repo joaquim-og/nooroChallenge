@@ -5,5 +5,6 @@ data class WeatherInfo(
     val feelsLikeCelcius: Double,
     val humidity: Int,
     val tempCelcius: Double,
-    val uv: Double
+    val uv: Double,
+    val cityName: String
 )

@@ -23,7 +23,7 @@ class WeatherAppViewModel(
     private val _weatherInfoState = MutableStateFlow(WeatherUiState())
     val weatherInfoState = _weatherInfoState
         .onStart {
-            searchWeatherInfo()
+            searchWeatherInfo(isFromStart = true)
         }
         .stateIn(
             viewModelScope,
@@ -31,15 +31,38 @@ class WeatherAppViewModel(
             WeatherUiState()
         )
 
-    fun searchWeatherInfo(cityName: String? = null) {
+    fun onAction(actions: WeatherAppActions) {
+        when (actions) {
+            is WeatherAppActions.onSearchWeatherInfo -> {
+                searchWeatherInfo(actions.cityName)
+            }
+
+            is WeatherAppActions.onTapLastCitySearchedCard -> {
+                _weatherInfoState.value.lastCitySearchedName?.let {
+                    saveLastSearchedCity(it)
+                    updateLastCitySearchedCardTappedState(true)
+                }
+            }
+        }
+    }
+
+    private fun searchWeatherInfo(
+        cityName: String? = null,
+        isFromStart: Boolean = false
+    ) {
+        updateLoadingState(true)
         viewModelScope.launch {
-            updateLoadingState(true)
             cityName?.let {
                 updateLastCitySearchedNameState(it)
             }
             getWeatherInfoUseCase.invoke(cityName)
                 .onSuccess { weatherInfo ->
                     updateWeatherInfoState(weatherInfo)
+                    if (weatherInfo != null && isFromStart) {
+                        updateLastCitySearchedCardTappedState(true)
+                    } else {
+                        updateLastCitySearchedCardTappedState(false)
+                    }
                 }
                 .onError { error ->
                     updateErrorState(error)
@@ -47,21 +70,17 @@ class WeatherAppViewModel(
         }
     }
 
-    //TODO
-    // call when user tap the city weather mini card
-    fun saveLastSearchedCity(city: String) {
+    private fun saveLastSearchedCity(city: String) {
         viewModelScope.launch {
             preferencesManager.saveLastCity(city)
         }
     }
 
-    //TODO
-    // call when user tap the city weather mini card
-    fun updateLastCitySearchedCardTappedState() {
+    private fun updateLastCitySearchedCardTappedState(isTapped: Boolean) {
         viewModelScope.launch {
             _weatherInfoState.update {
                 it.copy(
-                    isLastCitySearchedCardTapped = !it.isLastCitySearchedCardTapped
+                    isLastCitySearchedCardTapped = isTapped
                 )
             }
         }
@@ -103,7 +122,10 @@ class WeatherAppViewModel(
         viewModelScope.launch {
             _weatherInfoState.update {
                 it.copy(
-                    error = error
+                    error = error,
+                    weatherInfo = null,
+                    lastCitySearchedName = null,
+                    isLastCitySearchedCardTapped = false
                 )
             }
             updateLoadingState(false)

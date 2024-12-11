@@ -1,9 +1,27 @@
 <resources>
     <string name="app_name">NooroChallenge</string>
+
+<!--    region WeatherScreen-->
+    <string name="weatherScreen_search_bar_hint">Search Location</string>
+    <string name="weatherScreen_no_city_selected_title">No City Selected</string>
+    <string name="weatherScreen_no_city_selected_subtitle">Please Search For A City</string>
+    <string name="weatherScreen_details_humidity">Humidity</string>
+    <string name="weatherScreen_details_UV">UV</string>
+    <string name="weatherScreen_details_feels_like">Feels Like</string>
+    <!--    endregion WeatherScreen-->
+
+<!--    region commons-->
+    <string name="temperature_label">°</string>
+    <string name="humidity_label">#value%</string>
+    <string name="feels_like_label">#value°</string>
+    <string name="temperature_icon_description">temperature icon for #value</string>
+    <string name="location_icon_description">location icon description</string>
+    <string name="error_generic">Oooops</string>
     <string name="error_request_timeout">The request timed out</string>
     <string name="error_too_many_request">Api quota is exceeded</string>
     <string name="error_no_internet">Please check your internet connection</string>
     <string name="error_something_went_wrong">Something went wrong. Please try again later</string>
     <string name="error_no_matching_location">No matching location found, please check the city name</string>
     <string name="error_serialization">Couldn\'t match data</string>
+<!--    endregion commons-->
 </resources>

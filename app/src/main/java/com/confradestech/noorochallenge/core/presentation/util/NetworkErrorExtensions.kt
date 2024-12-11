@@ -4,7 +4,7 @@ import android.content.Context
 import com.confradestech.noorochallenge.R
 import com.confradestech.noorochallenge.core.domain.util.NetworkError
 
-fun NetworkError.toString(context: Context): String {
+fun NetworkError.getUiErrorFeedback(context: Context): String {
     return when (this) {
         NetworkError.REQUEST_TIMEOUT -> context.getString(R.string.error_request_timeout)
         NetworkError.TOO_MANY_REQUESTS -> context.getString(R.string.error_too_many_request)
@@ -12,7 +12,7 @@ fun NetworkError.toString(context: Context): String {
         NetworkError.SERVER_ERROR -> context.getString(R.string.error_something_went_wrong)
         NetworkError.SERIALIZATION -> context.getString(R.string.error_serialization)
         NetworkError.UNKNOWN -> context.getString(R.string.error_something_went_wrong)
-        NetworkError.NO_MATCHING_LOCATION -> context.getString(R.string.error_something_went_wrong)
+        NetworkError.NO_MATCHING_LOCATION -> context.getString(R.string.error_no_matching_location)
         NetworkError.NETWORK_ERROR -> context.getString(R.string.error_no_internet)
     }
 }

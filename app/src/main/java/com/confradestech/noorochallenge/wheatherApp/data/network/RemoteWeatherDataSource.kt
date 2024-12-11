@@ -21,7 +21,7 @@ class RemoteWeatherDataSource(
                 urlString = "${BuildConfig.BASE_URL}${BuildConfig.WEATHER_API_KEY}&q=$cityName"
             )
         }.map { response ->
-            response.weatherInfoDto.toWeatherInfo()
+            response.weatherInfoDto.toWeatherInfo(cityName)
         }
     }
 }
