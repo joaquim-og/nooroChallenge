@@ -1,6 +1,7 @@
 package com.confradestech.noorochallenge.wheatherApp.presentation
 
 import android.annotation.SuppressLint
+import android.widget.ProgressBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +63,9 @@ fun WeatherScreen(
         BuildSearchBar(
             onAction = onAction
         )
+        if (weatherInfoState.isLoading && weatherInfoState.error != null) {
+            BuildProgressIndicator()
+        }
         if (weatherInfoState.weatherInfo == null && weatherInfoState.error == null) {
             BuildNoCityText()
         }
@@ -156,9 +162,31 @@ private fun BuildErrorFeedback(error: NetworkError) {
     }
 }
 
+@Composable
+fun BuildProgressIndicator() {
+    Column(
+        modifier = Modifier.fillMaxSize(1f),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.width(64.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+    }
+}
+
 //region previews
 private class WeatherScreenPreviewProvider :
     PreviewParameterProvider<WeatherUiState> {
+    private val weatherInfo = WeatherInfo(
+        conditionIcon = "https://api.weatherapi.com//cdn.weatherapi.com/weather/64x64/night/266.png",
+        feelsLikeCelcius = 2.0,
+        humidity = 100,
+        tempCelcius = 5.3,
+        uv = 1.0
+    )
     override val values: Sequence<WeatherUiState>
         get() = sequenceOf(
             WeatherUiState(),
@@ -169,13 +197,12 @@ private class WeatherScreenPreviewProvider :
                 isLoading = true
             ),
             WeatherUiState(
-                weatherInfo = WeatherInfo(
-                    conditionIcon = "https://api.weatherapi.com//cdn.weatherapi.com/weather/64x64/night/266.png",
-                    feelsLikeCelcius = 2.0,
-                    humidity = 100,
-                    tempCelcius = 5.3,
-                    uv = 1.0
-                )
+                weatherInfo = weatherInfo,
+                isLastCitySearchedCardTapped = false
+            ),
+            WeatherUiState(
+                weatherInfo = weatherInfo,
+                isLastCitySearchedCardTapped = true
             )
         )
 }
