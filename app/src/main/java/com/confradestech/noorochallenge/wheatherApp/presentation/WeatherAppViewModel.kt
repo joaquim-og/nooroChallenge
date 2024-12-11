@@ -50,8 +50,8 @@ class WeatherAppViewModel(
         cityName: String? = null,
         isFromStart: Boolean = false
     ) {
+        updateLoadingState(true)
         viewModelScope.launch {
-            updateLoadingState(true)
             cityName?.let {
                 updateLastCitySearchedNameState(it)
             }
@@ -122,7 +122,10 @@ class WeatherAppViewModel(
         viewModelScope.launch {
             _weatherInfoState.update {
                 it.copy(
-                    error = error
+                    error = error,
+                    weatherInfo = null,
+                    lastCitySearchedName = null,
+                    isLastCitySearchedCardTapped = false
                 )
             }
             updateLoadingState(false)

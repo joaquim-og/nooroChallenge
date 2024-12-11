@@ -8,6 +8,8 @@
     <!--    endregion WeatherScreen-->
 
 <!--    region commons-->
+    <string name="temperature_label">°</string>
+    <string name="temperature_icon_description">temperature icon for #value</string>
     <string name="error_generic">Oooops</string>
     <string name="error_request_timeout">The request timed out</string>
     <string name="error_too_many_request">Api quota is exceeded</string>

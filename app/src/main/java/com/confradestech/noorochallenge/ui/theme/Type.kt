@@ -33,5 +33,11 @@ val Typography = Typography(
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp,
         color = inputFieldColor
+    ),
+    labelMedium = TextStyle(
+        fontFamily = PoppinsFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 20.sp,
+        color = titleColor
     )
 )

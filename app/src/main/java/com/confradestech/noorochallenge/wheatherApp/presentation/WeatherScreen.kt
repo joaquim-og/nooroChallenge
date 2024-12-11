@@ -1,16 +1,18 @@
 package com.confradestech.noorochallenge.wheatherApp.presentation
 
 import android.annotation.SuppressLint
-import android.widget.ProgressBar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,16 +32,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.confradestech.noorochallenge.R
 import com.confradestech.noorochallenge.core.domain.util.NetworkError
+import com.confradestech.noorochallenge.core.presentation.util.capitalizeFirstLetter
 import com.confradestech.noorochallenge.core.presentation.util.getUiErrorFeedback
+import com.confradestech.noorochallenge.core.presentation.util.sanitizeToValidHttps
 import com.confradestech.noorochallenge.ui.theme.NooroChallengeTheme
 import com.confradestech.noorochallenge.ui.theme.cardBackGround
 import com.confradestech.noorochallenge.ui.theme.inputFieldColor
@@ -63,14 +71,23 @@ fun WeatherScreen(
         BuildSearchBar(
             onAction = onAction
         )
-        if (weatherInfoState.isLoading && weatherInfoState.error != null) {
+        if (weatherInfoState.isLoading) {
             BuildProgressIndicator()
         }
-        if (weatherInfoState.weatherInfo == null && weatherInfoState.error == null) {
+        if (weatherInfoState.error != null) {
+            BuildErrorFeedback(weatherInfoState.error)
+        }
+        if (weatherInfoState.weatherInfo == null) {
             BuildNoCityText()
         }
-        if (weatherInfoState.weatherInfo == null && weatherInfoState.error != null) {
-            BuildErrorFeedback(weatherInfoState.error)
+        if (
+            weatherInfoState.weatherInfo != null &&
+            weatherInfoState.isLastCitySearchedCardTapped == false
+        ) {
+            BuildWeatherInfoCard(
+                weatherInfo = weatherInfoState,
+                onAction = onAction
+            )
         }
     }
 }
@@ -177,14 +194,141 @@ fun BuildProgressIndicator() {
     }
 }
 
+@Composable
+private fun BuildWeatherInfoCard(
+    weatherInfo: WeatherUiState,
+    onAction: (WeatherAppActions) -> Unit
+) {
+    Spacer(Modifier.height(30.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 3.dp)
+            .height(105.dp)
+            .background(
+                color = cardBackGround,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable { onAction(WeatherAppActions.onTapLastCitySearchedCard) }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            //Weather info
+            Column(
+                modifier = Modifier
+                    .padding(
+                        start = 20.dp
+                    ),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    weatherInfo.lastCitySearchedName?.capitalizeFirstLetter().orEmpty(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = titleColor,
+                    fontSize = 18.sp
+                )
+                BuildTemperatureLabel(
+                    temperature = weatherInfo.weatherInfo?.tempCelcius,
+                    isWeatherCard = true
+                )
+            }
+
+            //Icon
+            Column(
+                modifier = Modifier
+                    .padding(
+                        end = 20.dp
+                    )
+            ) {
+                BuildWeatherIcon(
+                    iconUrl = weatherInfo.weatherInfo?.conditionIcon.orEmpty(),
+                    cityName = weatherInfo.lastCitySearchedName.orEmpty(),
+                    isWeatherCard = true
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuildTemperatureLabel(
+    temperature: Double?,
+    isWeatherCard: Boolean
+) {
+    Row(
+        modifier = Modifier,
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = temperature?.toInt().toString(),
+            style = MaterialTheme.typography.labelSmall,
+            color = titleColor,
+            fontSize = 50.sp
+
+        )
+        Text(
+            modifier = Modifier.padding(
+                top = 10.dp,
+                start = if (isWeatherCard) {
+                    10.dp
+                } else {
+                    5.dp
+                },
+            ),
+            text = stringResource(R.string.temperature_label),
+            style = MaterialTheme.typography.labelSmall,
+            color = titleColor,
+            fontSize = if (isWeatherCard) {
+                15.sp
+            } else {
+                20.sp
+            }
+        )
+    }
+}
+
+@Composable
+private fun BuildWeatherIcon(
+    iconUrl: String,
+    cityName: String,
+    isWeatherCard: Boolean
+) {
+    AsyncImage(
+        modifier = Modifier.then(
+            if (isWeatherCard) {
+                Modifier
+                    .width(67.dp)
+                    .height(83.dp)
+            } else {
+                Modifier.size(123.dp)
+            }
+        ),
+        model = iconUrl.sanitizeToValidHttps(),
+        contentDescription = stringResource(R.string.temperature_icon_description).replace(
+            "#value",
+            cityName
+        ),
+        placeholder = painterResource(R.drawable.baseline_image_search_24),
+        error = painterResource(R.drawable.baseline_broken_image_24),
+    )
+}
+
+
 //region previews
 private class WeatherScreenPreviewProvider :
     PreviewParameterProvider<WeatherUiState> {
     private val weatherInfo = WeatherInfo(
-        conditionIcon = "https://api.weatherapi.com//cdn.weatherapi.com/weather/64x64/night/266.png",
+        conditionIcon = "https://cdn.weatherapi.com/weather/64x64/night/143.png",
         feelsLikeCelcius = 2.0,
         humidity = 100,
-        tempCelcius = 5.3,
+        tempCelcius = 20.0,
         uv = 1.0
     )
     override val values: Sequence<WeatherUiState>
@@ -197,10 +341,12 @@ private class WeatherScreenPreviewProvider :
                 isLoading = true
             ),
             WeatherUiState(
+                lastCitySearchedName = "Mumbai",
                 weatherInfo = weatherInfo,
                 isLastCitySearchedCardTapped = false
             ),
             WeatherUiState(
+                lastCitySearchedName = "Berlin",
                 weatherInfo = weatherInfo,
                 isLastCitySearchedCardTapped = true
             )
@@ -209,7 +355,7 @@ private class WeatherScreenPreviewProvider :
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-@Preview
+@Preview(showSystemUi = true)
 private fun WeatherScreenPreview(
     @PreviewParameter(WeatherScreenPreviewProvider::class) weatherScreenPreviewProvider: WeatherUiState
 ) {
