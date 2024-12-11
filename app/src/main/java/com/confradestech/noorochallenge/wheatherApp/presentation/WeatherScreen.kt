@@ -32,10 +32,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -85,8 +85,16 @@ fun WeatherScreen(
             weatherInfoState.isLastCitySearchedCardTapped == false
         ) {
             BuildWeatherInfoCard(
-                weatherInfo = weatherInfoState,
+                weatherState = weatherInfoState,
                 onAction = onAction
+            )
+        }
+        if (
+            weatherInfoState.weatherInfo != null &&
+            weatherInfoState.isLastCitySearchedCardTapped == true
+        ) {
+            BuildWeatherDetailsBody(
+                weatherState = weatherInfoState
             )
         }
     }
@@ -196,7 +204,7 @@ fun BuildProgressIndicator() {
 
 @Composable
 private fun BuildWeatherInfoCard(
-    weatherInfo: WeatherUiState,
+    weatherState: WeatherUiState,
     onAction: (WeatherAppActions) -> Unit
 ) {
     Spacer(Modifier.height(30.dp))
@@ -228,13 +236,13 @@ private fun BuildWeatherInfoCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    weatherInfo.lastCitySearchedName?.capitalizeFirstLetter().orEmpty(),
+                    weatherState.lastCitySearchedName?.capitalizeFirstLetter().orEmpty(),
                     style = MaterialTheme.typography.labelMedium,
                     color = titleColor,
                     fontSize = 18.sp
                 )
                 BuildTemperatureLabel(
-                    temperature = weatherInfo.weatherInfo?.tempCelcius,
+                    temperature = weatherState.weatherInfo?.tempCelcius,
                     isWeatherCard = true
                 )
             }
@@ -247,12 +255,54 @@ private fun BuildWeatherInfoCard(
                     )
             ) {
                 BuildWeatherIcon(
-                    iconUrl = weatherInfo.weatherInfo?.conditionIcon.orEmpty(),
-                    cityName = weatherInfo.lastCitySearchedName.orEmpty(),
+                    iconUrl = weatherState.weatherInfo?.conditionIcon.orEmpty(),
+                    cityName = weatherState.lastCitySearchedName.orEmpty(),
                     isWeatherCard = true
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun BuildWeatherDetailsBody(
+    weatherState: WeatherUiState
+) {
+    Spacer(Modifier.height(60.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxSize(1F),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        BuildWeatherIcon(
+            iconUrl = weatherState.weatherInfo?.conditionIcon.orEmpty(),
+            cityName = weatherState.lastCitySearchedName.orEmpty(),
+            isWeatherCard = false
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                weatherState.lastCitySearchedName?.capitalizeFirstLetter()
+                    ?: weatherState.weatherInfo?.cityName?.capitalizeFirstLetter().orEmpty(),
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Spacer(Modifier.width(10.dp))
+            Icon(
+                modifier = Modifier.size(21.dp),
+                painter = painterResource(R.drawable.location_img),
+                contentDescription = stringResource(R.string.location_icon_description)
+            )
+        }
+        Spacer(Modifier.height(5.dp))
+        BuildTemperatureLabel(
+            temperature = weatherState.weatherInfo?.tempCelcius,
+            isWeatherCard = false
+        )
+        Spacer(Modifier.height(20.dp))
+        BuildWeatherDetailsCard(weatherState = weatherState)
     }
 }
 
@@ -270,8 +320,11 @@ private fun BuildTemperatureLabel(
             text = temperature?.toInt().toString(),
             style = MaterialTheme.typography.labelSmall,
             color = titleColor,
-            fontSize = 50.sp
-
+            fontSize = if (isWeatherCard) {
+                50.sp
+            } else {
+                80.sp
+            }
         )
         Text(
             modifier = Modifier.padding(
@@ -320,16 +373,92 @@ private fun BuildWeatherIcon(
     )
 }
 
+@Composable
+private fun BuildWeatherDetailsCard(weatherState: WeatherUiState) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 40.dp)
+            .height(80.dp)
+            .background(
+                color = cardBackGround,
+                shape = RoundedCornerShape(16.dp)
+            )
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            //Humidity
+            BuildWeatherDetailsTexts(
+                title = stringResource(R.string.weatherScreen_details_humidity),
+                value = stringResource(R.string.humidity_label).replace(
+                    "#value",
+                    weatherState.weatherInfo?.humidity.toString()
+                )
+            )
+
+            //UV
+            BuildWeatherDetailsTexts(
+                title = stringResource(R.string.weatherScreen_details_UV),
+                value = weatherState.weatherInfo?.uv.toString()
+            )
+
+            //Feels like
+            BuildWeatherDetailsTexts(
+                title = stringResource(R.string.weatherScreen_details_feels_like),
+                value = stringResource(R.string.feels_like_label).replace(
+                    "#value",
+                    weatherState.weatherInfo?.feelsLikeCelcius?.toInt().toString()
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun BuildWeatherDetailsTexts(
+    title: String,
+    value: String
+) {
+    Column(
+        modifier = Modifier.width(60.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 12.sp
+        )
+        Spacer(modifier = Modifier.height(5.dp))
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            softWrap = false,
+            text = value,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp
+        )
+    }
+}
 
 //region previews
 private class WeatherScreenPreviewProvider :
     PreviewParameterProvider<WeatherUiState> {
     private val weatherInfo = WeatherInfo(
         conditionIcon = "https://cdn.weatherapi.com/weather/64x64/night/143.png",
-        feelsLikeCelcius = 2.0,
+        feelsLikeCelcius = 20.0,
         humidity = 100,
         tempCelcius = 20.0,
-        uv = 1.0
+        uv = 1.0,
+        cityName = ""
     )
     override val values: Sequence<WeatherUiState>
         get() = sequenceOf(
@@ -342,12 +471,12 @@ private class WeatherScreenPreviewProvider :
             ),
             WeatherUiState(
                 lastCitySearchedName = "Mumbai",
-                weatherInfo = weatherInfo,
+                weatherInfo = weatherInfo.copy(cityName = "Mumbai"),
                 isLastCitySearchedCardTapped = false
             ),
             WeatherUiState(
                 lastCitySearchedName = "Berlin",
-                weatherInfo = weatherInfo,
+                weatherInfo = weatherInfo.copy(cityName = "Berlin"),
                 isLastCitySearchedCardTapped = true
             )
         )
