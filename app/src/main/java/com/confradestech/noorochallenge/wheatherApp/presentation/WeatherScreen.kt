@@ -1,6 +1,5 @@
 package com.confradestech.noorochallenge.wheatherApp.presentation
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,25 +34,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.confradestech.noorochallenge.R
 import com.confradestech.noorochallenge.core.domain.util.NetworkError
 import com.confradestech.noorochallenge.core.presentation.util.capitalizeFirstLetter
 import com.confradestech.noorochallenge.core.presentation.util.getUiErrorFeedback
-import com.confradestech.noorochallenge.core.presentation.util.sanitizeToValidHttps
 import com.confradestech.noorochallenge.ui.theme.NooroChallengeTheme
 import com.confradestech.noorochallenge.ui.theme.cardBackGround
 import com.confradestech.noorochallenge.ui.theme.inputFieldColor
 import com.confradestech.noorochallenge.ui.theme.titleColor
 import com.confradestech.noorochallenge.wheatherApp.domain.WeatherInfo
-
+import com.confradestech.noorochallenge.wheatherApp.presentation.components.WeatherDetailsTexts
+import com.confradestech.noorochallenge.wheatherApp.presentation.components.WeatherIcon
+import com.confradestech.noorochallenge.wheatherApp.presentation.components.WeatherTemperatureLabel
 
 @Composable
 fun WeatherScreen(
@@ -241,7 +239,7 @@ private fun BuildWeatherInfoCard(
                     color = titleColor,
                     fontSize = 18.sp
                 )
-                BuildTemperatureLabel(
+                WeatherTemperatureLabel(
                     temperature = weatherState.weatherInfo?.tempCelcius,
                     isWeatherCard = true
                 )
@@ -254,7 +252,7 @@ private fun BuildWeatherInfoCard(
                         end = 20.dp
                     )
             ) {
-                BuildWeatherIcon(
+                WeatherIcon(
                     iconUrl = weatherState.weatherInfo?.conditionIcon.orEmpty(),
                     cityName = weatherState.lastCitySearchedName.orEmpty(),
                     isWeatherCard = true
@@ -275,7 +273,7 @@ private fun BuildWeatherDetailsBody(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BuildWeatherIcon(
+        WeatherIcon(
             iconUrl = weatherState.weatherInfo?.conditionIcon.orEmpty(),
             cityName = weatherState.lastCitySearchedName.orEmpty(),
             isWeatherCard = false
@@ -297,80 +295,13 @@ private fun BuildWeatherDetailsBody(
             )
         }
         Spacer(Modifier.height(5.dp))
-        BuildTemperatureLabel(
+        WeatherTemperatureLabel(
             temperature = weatherState.weatherInfo?.tempCelcius,
             isWeatherCard = false
         )
         Spacer(Modifier.height(20.dp))
         BuildWeatherDetailsCard(weatherState = weatherState)
     }
-}
-
-@Composable
-private fun BuildTemperatureLabel(
-    temperature: Double?,
-    isWeatherCard: Boolean
-) {
-    Row(
-        modifier = Modifier,
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = temperature?.toInt().toString(),
-            style = MaterialTheme.typography.labelSmall,
-            color = titleColor,
-            fontSize = if (isWeatherCard) {
-                50.sp
-            } else {
-                80.sp
-            }
-        )
-        Text(
-            modifier = Modifier.padding(
-                top = 10.dp,
-                start = if (isWeatherCard) {
-                    10.dp
-                } else {
-                    5.dp
-                },
-            ),
-            text = stringResource(R.string.temperature_label),
-            style = MaterialTheme.typography.labelSmall,
-            color = titleColor,
-            fontSize = if (isWeatherCard) {
-                15.sp
-            } else {
-                20.sp
-            }
-        )
-    }
-}
-
-@Composable
-private fun BuildWeatherIcon(
-    iconUrl: String,
-    cityName: String,
-    isWeatherCard: Boolean
-) {
-    AsyncImage(
-        modifier = Modifier.then(
-            if (isWeatherCard) {
-                Modifier
-                    .width(67.dp)
-                    .height(83.dp)
-            } else {
-                Modifier.size(123.dp)
-            }
-        ),
-        model = iconUrl.sanitizeToValidHttps(),
-        contentDescription = stringResource(R.string.temperature_icon_description).replace(
-            "#value",
-            cityName
-        ),
-        placeholder = painterResource(R.drawable.baseline_image_search_24),
-        error = painterResource(R.drawable.baseline_broken_image_24),
-    )
 }
 
 @Composable
@@ -394,7 +325,7 @@ private fun BuildWeatherDetailsCard(weatherState: WeatherUiState) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             //Humidity
-            BuildWeatherDetailsTexts(
+            WeatherDetailsTexts(
                 title = stringResource(R.string.weatherScreen_details_humidity),
                 value = stringResource(R.string.humidity_label).replace(
                     "#value",
@@ -403,13 +334,13 @@ private fun BuildWeatherDetailsCard(weatherState: WeatherUiState) {
             )
 
             //UV
-            BuildWeatherDetailsTexts(
+            WeatherDetailsTexts(
                 title = stringResource(R.string.weatherScreen_details_UV),
                 value = weatherState.weatherInfo?.uv.toString()
             )
 
             //Feels like
-            BuildWeatherDetailsTexts(
+            WeatherDetailsTexts(
                 title = stringResource(R.string.weatherScreen_details_feels_like),
                 value = stringResource(R.string.feels_like_label).replace(
                     "#value",
@@ -420,34 +351,6 @@ private fun BuildWeatherDetailsCard(weatherState: WeatherUiState) {
     }
 }
 
-@Composable
-private fun BuildWeatherDetailsTexts(
-    title: String,
-    value: String
-) {
-    Column(
-        modifier = Modifier.width(60.dp),
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            text = title,
-            style = MaterialTheme.typography.labelSmall,
-            fontSize = 12.sp
-        )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            softWrap = false,
-            text = value,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp
-        )
-    }
-}
 
 //region previews
 private class WeatherScreenPreviewProvider :
@@ -482,7 +385,6 @@ private class WeatherScreenPreviewProvider :
         )
 }
 
-@SuppressLint("UnrememberedMutableState")
 @Composable
 @Preview(showSystemUi = true)
 private fun WeatherScreenPreview(
